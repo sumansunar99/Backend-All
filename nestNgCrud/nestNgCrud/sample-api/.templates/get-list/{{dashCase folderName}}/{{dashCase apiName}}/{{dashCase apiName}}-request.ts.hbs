@@ -1,0 +1,17 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { SortingDirection } from '@src/shared/utils/util';
+
+export class {{pascalCase apiName}}Request {
+  @ApiPropertyOptional()
+  pageNumber: number = 1;
+  @ApiPropertyOptional()
+  pageSize: number = 50;
+  @ApiPropertyOptional({
+    enum:SortingDirection
+  })
+  sortingDirection: SortingDirection;
+  @ApiPropertyOptional()
+  orderByPropertyName: string = 'id';
+  @ApiPropertyOptional()
+  search: string;
+}

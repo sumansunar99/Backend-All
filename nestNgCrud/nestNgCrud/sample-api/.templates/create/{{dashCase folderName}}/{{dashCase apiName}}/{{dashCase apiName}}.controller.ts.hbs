@@ -1,0 +1,44 @@
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { {{pascalCase apiName}}Response } from './{{dashCase apiName}}-response';
+import { {{pascalCase apiName}}Request } from './{{dashCase apiName}}-request';
+import { ErrorResponseModel } from 'src/api/api.exception';
+import { PrismaService } from 'src/prisma.service';
+
+@ApiTags('{{pascalCase moduleName}}')
+@Controller('{{dashCase moduleName}}/{{dashCase controllerName}}')
+export class {{pascalCase apiName}}Controller {
+  constructor(private readonly prismaService: PrismaService) {}
+
+  @Post()
+  @ApiResponse({status: HttpStatus.OK,description: '',type: {{pascalCase apiName}}Response,})
+  @ApiResponse({status: HttpStatus.NOT_FOUND,description: '',type: ErrorResponseModel,})
+  @ApiOperation({ operationId: '{{camelCase apiName}}' })
+  @HttpCode(201)
+  async execute(
+    @Body() request: {{pascalCase apiName}}Request,
+  ): Promise<{{pascalCase apiName}}Response> {
+    const result = await this.prismaService.{{camelCase name}}.create({
+      data: {
+        {{#each fields}}
+        {{#if (or (eq this.type "String") (eq this.type "String?")  (eq this.type "Boolean?")  (eq this.type "Boolean?")  (eq this.type "Int?")  (eq this.type "Int?") )}}
+        {{this.name}}: request.{{this.name}},
+        {{/if}}
+        {{/each}}
+      },
+    });
+    return {
+      id: result.id,
+    };
+  }
+}

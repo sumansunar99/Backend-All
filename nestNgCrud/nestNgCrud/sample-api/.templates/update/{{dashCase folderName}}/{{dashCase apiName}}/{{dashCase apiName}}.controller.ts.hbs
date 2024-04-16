@@ -1,0 +1,46 @@
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Put,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { {{pascalCase apiName}}Request } from './{{dashCase apiName}}-request';
+import { PrismaService } from 'src/prisma.service';
+
+@ApiTags('{{pascalCase moduleName}}')
+@Controller('{{dashCase moduleName}}/{{dashCase controllerName}}')
+export class {{pascalCase apiName}}Controller {
+  constructor(private readonly prismaService: PrismaService) {}
+
+  @Put(':id')
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+  })
+  @ApiOperation({ operationId: '{{camelCase apiName}}' })
+  @HttpCode(204)
+  async execute(
+    @Param('id') id: string,
+    @Body() request: {{pascalCase apiName}}Request,
+  ): Promise<void> {
+    await this.prismaService.{{camelCase name}}.update({
+      where: {
+        id: id,
+      },
+      data: {
+        {{#each fields}}
+        {{#if (or (eq this.type "String") (eq this.type "String?") (eq this.type "Boolean") (eq this.type "Boolean?") (eq this.type "Int") (eq this.type "Int?"))}}
+        {{this.name}}: request.{{this.name}},
+        {{/if}}
+        {{/each}}
+      },
+    });
+  }
+}

@@ -1,0 +1,45 @@
+version: '3.8'
+
+
+volumes:
+  mysql-data:
+    null
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+
+    volumes:
+      - ../..:/workspaces:cached
+      
+    command: sleep infinity
+
+    network_mode: service:db
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: mysupersecretpassword
+      MYSQL_DATABASE: sample
+      SERVICE_NAME: mysql
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    build:
+      context: ./phpmyadmin
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: mysupersecretpassword
+      MYSQL_DATABASE: sample
+      MYSQL_USER: root

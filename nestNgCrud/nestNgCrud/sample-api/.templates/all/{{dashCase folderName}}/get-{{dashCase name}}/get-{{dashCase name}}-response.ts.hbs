@@ -1,0 +1,24 @@
+import { IsInt, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class Get{{pascalCase name}}Response {
+  {{#each fields}}
+  {{#if (or (eq this.type "String") (eq this.type "String?"))}}
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  readonly {{this.name}}{{#if (eq this.type "String?")}}?{{/if}}: string;
+  {{/if}}
+  {{#if (or (eq this.type "Boolean") (eq this.type "Boolean?"))}}
+  @ApiProperty()
+  @IsOptional()
+  readonly {{this.name}}{{#if (eq this.type "Boolean?")}}?{{/if}}: boolean;
+  {{/if}}
+  {{#if (or (eq this.type "Int") (eq this.type "Int?"))}}
+  @ApiProperty()
+  @IsOptional()
+  @IsInt()
+  readonly {{this.name}}{{#if (eq this.type "Int?")}}?{{/if}}: number;
+  {{/if}}
+  {{/each}}
+}

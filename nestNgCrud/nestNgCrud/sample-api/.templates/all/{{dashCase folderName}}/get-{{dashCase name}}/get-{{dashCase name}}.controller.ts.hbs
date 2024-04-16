@@ -1,0 +1,35 @@
+import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Get{{pascalCase name}}Response } from './get-{{dashCase name}}-response';
+import { PrismaService } from 'src/prisma.service';
+
+@ApiTags('{{pascalCase moduleName}}')
+@Controller('{{dashCase moduleName}}/{{dashCase controllerName}}')
+export class Get{{pascalCase name}}Controller {
+  constructor(private readonly prismaService: PrismaService) {}
+
+  @Get(':id')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '',
+  })
+  @ApiOperation({ operationId: 'get{{pascalCase name}}' })
+  @HttpCode(200)
+  async execute(@Param('id') id: string): Promise<Get{{pascalCase name}}Response> {
+    const result = await this.prismaService.{{camelCase name}}.findUnique({
+      where: { id: id },
+    });
+    return {
+      {{#each fields}}
+      {{#if (or (eq this.type "String") (eq this.type "String?") (eq this.type "Boolean") (eq this.type "Boolean?") (eq this.type "Int") (eq this.type "Int?"))}}
+      {{this.name}}: result.{{this.name}},
+      {{/if}}
+      {{/each}}
+    } as Get{{pascalCase name}}Response;
+  }
+}

@@ -1,0 +1,94 @@
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Get{{pascalCase name}}ListResponse } from './get-{{dashCase name}}-list-response';
+import { ErrorResponseModel } from 'src/api/api.exception';
+import { PrismaService } from '@src/prisma.service';
+import { Get{{pascalCase name}}ListRequest } from './get-{{dashCase name}}-list-request';
+
+@ApiTags('{{pascalCase moduleName}}')
+@Controller('{{dashCase moduleName}}/{{dashCase controllerName}}')
+export class Get{{pascalCase name}}ListController {
+  constructor(private readonly prismaService: PrismaService) {}
+
+  @Get()
+  @ApiResponse({status: HttpStatus.OK,description: 'List of {{pascalCase name}}',type: [Get{{pascalCase name}}ListResponse],})
+  @ApiResponse({status: HttpStatus.NOT_FOUND,description: 'No {{pascalCase name}} found',type: ErrorResponseModel,})
+  @ApiOperation({ operationId: 'get{{pascalCase name}}List' })
+  @HttpCode(200)
+  async execute(@Query() request: Get{{pascalCase name}}ListRequest,): Promise<Get{{pascalCase name}}ListResponse> {
+  const whereCondition = {
+  OR: [
+    {{#each fields}}
+    {{#if (or (eq this.type "String") (eq this.type "String?"))}}
+    { {{this.name}}: { contains: request.search || '' } },
+    {{/if}}
+    {{/each}}
+  ],
+};
+
+let orderByCondition: any = {};
+
+switch (request.orderByPropertyName) {
+  {{#each fields}}
+  {{#if (or (eq this.type "String") (eq this.type "String?") (eq this.type "Int") (eq this.type "Int?") (eq this.type "Boolean") (eq this.type "Boolean?"))}}
+  case '{{this.name}}':
+    orderByCondition = {
+      {{this.name}}: request.sortingDirection,
+    };
+    break;
+  {{/if}}
+  {{/each}}
+
+  default:
+    orderByCondition = {
+      updatedOn: 'DESC', // Replace 'updatedOn' with your default sort field
+    };
+    break;
+}
+
+const result = await this.prismaService.$transaction([
+  this.prismaService.{{camelCase name}}.count({
+    skip: request.pageNumber * request.pageSize - request.pageSize,
+    take: request.pageSize,
+    where: whereCondition,
+  }),
+
+  this.prismaService.{{camelCase name}}.findMany({
+    skip: request.pageNumber * request.pageSize - request.pageSize,
+    take: request.pageSize,
+    where: whereCondition,
+    orderBy: orderByCondition,
+  }),
+]);
+
+const response = {
+  orderByPropertyName: request.orderByPropertyName,
+  sortingDirection: request.sortingDirection,
+  pageNumber: request.pageNumber,
+  pageSize: request.pageSize,
+  totalCount: result[0],
+  items: result[1].map((x) => {
+  return {
+    {{#each fields}}
+    {{#if (or (eq this.type "String") (eq this.type "String?")  (eq this.type "Boolean?")  (eq this.type "Boolean?")  (eq this.type "Int?")  (eq this.type "Int?"))}}
+    {{this.name}}: x.{{this.name}},
+    {{/if}}
+    {{/each}}
+  };
+}),
+
+};
+return response;
+
+  }
+}
